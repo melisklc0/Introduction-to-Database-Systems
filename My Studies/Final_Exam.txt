@@ -1,0 +1,57 @@
+--1) show products from the confections category sold in May 1997
+select p.ProductID, p.ProductName, c.CategoryName,o.OrderDate
+from Categories as c 
+inner join Products as p on p.CategoryID = c.CategoryID
+inner join [Order Details] as od on p.ProductID = od.ProductID
+inner join Orders as o on od.OrderID = o.OrderID
+where c.CategoryName = 'Confections' and YEAR(o.OrderDate) = '1997'
+
+--2)  for each shipper, display: the name of the shipper and the number of orders shipped in March 1997
+
+select s.ShipperID, s.CompanyName, 
+COUNT(o.OrderID) as ShippedOrderNumber
+from Shippers as s
+left outer join Orders as o on s.ShipperID = o.ShipVia
+where YEAR(o.ShippedDate) = 1997 and MONTH(o.ShippedDate) = 3
+group by s.ShipperID, s.CompanyName
+
+-- 3) for each customer, disply the total value of orders in march 1998 (including discount and freight)
+--the resultset should contain the customer name(company name) and the value value of orders
+select c.CompanyName,
+SUM() AS TotalOrderValue
+FROM Customers as c
+inner join Orders as o on c.CustomerID = o.CustomerID
+inner join [Order Details] as od on o.OrderID = od.OrderID
+where YEAR(o.OrderDate) = '1998'and MONTH(o.OrderDate) = 3
+group by c.CompanyName;
+
+--4) select customers without any order in '1998-09-05'
+--show the solution using:
+--a) JOIN
+select distinct c.CustomerID, c.ContactName, o.OrderDate
+from Customers as c
+left outer join Orders as o on c.CustomerID = o.CustomerID 
+and o.OrderDate >= '1998-09-05' and o.OrderDate < '1998-09-06'
+where o.OrderID IS NULL;
+
+--b) subquery and exist operator
+select CustomerID, ContactName
+from
+    Customers
+where
+    NOT EXISTS (select CustomerID 
+    from Orders
+    where Customers.CustomerID = Orders.CustomerID
+    and OrderDate >= '1998-09-05' and OrderDate < '1998-09-06'
+    );
+
+
+
+
+
+5) explain how one-to-many relationships should be designed in a relational database, and show an example
+(e.g., the database diagram fragment)
+
+6) explain how many-to-many relationships should be designed in a relational database, and show an example
+(e.g., the database diagram fragment)
+
